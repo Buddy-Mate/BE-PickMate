@@ -1,3 +1,7 @@
 jwt:
   secret-key: jOJulXbiOPdsLN4dIYBDg6y4UHUCntHn83ybmBaUREAo9Us+Dl8HUMrVA7j7jykrXYo6e/7PBX2veYeOvqDAHg==
   expiration-time: 864000000 # 1일
+
+server:
+  port: 8080
+  address: 0.0.0.0
