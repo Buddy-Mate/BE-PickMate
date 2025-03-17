@@ -1,5 +1,6 @@
 package com.Buddymate.pickMate.service;
 
+import com.Buddymate.pickMate.dto.UserResponseDto;
 import com.Buddymate.pickMate.entity.User;
 import com.Buddymate.pickMate.exception.CustomException;
 import com.Buddymate.pickMate.repository.UserRepository;
@@ -7,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Date;
 
 @Service
 @RequiredArgsConstructor
@@ -35,8 +38,16 @@ public class UserService {
                 .email(email)
                 .nickname(nickname)
                 .password(encodedPassword)
+                .createdAt(new Date())
                 .build();
 
         return userRepository.save(user);
+    }
+
+    // 사용자 정보 조회 메소드
+    public UserResponseDto getUserByEmail(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없음"));
+
+        return new UserResponseDto(user);
     }
 }

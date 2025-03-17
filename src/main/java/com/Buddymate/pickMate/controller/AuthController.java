@@ -1,6 +1,7 @@
 package com.Buddymate.pickMate.controller;
 
 import com.Buddymate.pickMate.config.JwtTokenProvider;
+import com.Buddymate.pickMate.dto.AuthResponseDto;
 import com.Buddymate.pickMate.dto.LoginRequestDto;
 import com.Buddymate.pickMate.dto.SignupRequestDto;
 import com.Buddymate.pickMate.entity.User;
@@ -57,19 +58,6 @@ public class AuthController {
         // 이메일, 비밀번호 인증 시 JWT 토큰 생성
         String token = jwtTokenProvider.generateToken(user.getEmail());
 
-        return ResponseEntity.ok(new AuthResponse(token));
-    }
-
-    // 로그인 응답을 위한 DTO
-    static class AuthResponse {
-        private String token;
-
-        public AuthResponse(String token) {
-            this.token = token;
-        }
-
-        public String getToken() {
-            return token;
-        }
+        return ResponseEntity.ok(new AuthResponseDto(token, user.getNickname()));
     }
 }
