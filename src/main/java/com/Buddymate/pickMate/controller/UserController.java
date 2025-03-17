@@ -18,7 +18,7 @@ public class UserController {
     private final JwtTokenProvider jwtTokenProvider;
     private final UserService userService;
 
-    @GetMapping("/myInfo")
+    @GetMapping("/auth/my")
     public ResponseEntity<?> getUserInfo(HttpServletRequest request) {
         // 요청 헤더에서 Authorization 가져오기
         String token = extractTokenFromRequest(request);
