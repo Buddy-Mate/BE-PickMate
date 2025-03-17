@@ -42,9 +42,10 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(List.of("http://13.125.247.156", "http://localhost:3000", "https://fe-pick-mate.vercel.app"));
+        config.setAllowedOrigins(List.of("https://be-pickmate.shop", "http://localhost:3000", "https://fe-pick-mate.vercel.app"));
         config.addAllowedHeader("*");
-        config.addAllowedMethod("*");
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
