@@ -1,14 +1,15 @@
 package com.Buddymate.pickMate.config;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
 
+@Slf4j
 @Component
 public class JwtTokenProvider {
 
@@ -32,14 +33,24 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    // JWT 검증
+    // JWT 검증 (예외 로그 추가)
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            Jws<Claims> claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            log.info("JWT 검증 성공: {}", claims.getBody().getSubject());
             return true;
-        } catch (Exception e) {
-            return false;
+        } catch (ExpiredJwtException e) {
+            log.error("JWT 만료됨: {}", e.getMessage());
+        } catch (UnsupportedJwtException e) {
+            log.error("지원되지 않는 JWT 형식: {}", e.getMessage());
+        } catch (MalformedJwtException e) {
+            log.error("잘못된 JWT 형식: {}", e.getMessage());
+        } catch (SignatureException e) {
+            log.error("JWT 서명 검증 실패: {}", e.getMessage());
+        } catch (IllegalArgumentException e) {
+            log.error("JWT 토큰이 비어 있음: {}", e.getMessage());
         }
+        return false;
     }
 
     // JWT에서 사용자 이메일 추출
