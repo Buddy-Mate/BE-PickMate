@@ -29,7 +29,7 @@ public class ProjectService {
                 .title(request.getTitle())
                 .description(request.getDescription())
                 .author(author)
-                .techStack(request.getTechStack())
+                .techStack(ProjectDto.convertListToString(request.getTechStack()))
                 .deadline(request.getDeadline())
                 .build();
 
@@ -70,7 +70,7 @@ public class ProjectService {
 
         project.setTitle(request.getTitle());
         project.setDescription(request.getDescription());
-        project.setTechStack(request.getTechStack());
+        project.setTechStack(ProjectDto.convertListToString(request.getTechStack()));
         project.setDeadline(request.getDeadline());
 
         return new ProjectDto.Response(project);

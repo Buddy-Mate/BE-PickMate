@@ -7,6 +7,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class ProjectDto {
 
@@ -17,7 +21,7 @@ public class ProjectDto {
     public static class CreateRequest {
         private String title;
         private String description;
-        private String techStack;
+        private List<String> techStack;
         private LocalDateTime deadline;
     }
 
@@ -27,7 +31,7 @@ public class ProjectDto {
         private Long id;
         private String title;
         private String description;
-        private String techStack;
+        private List<String> techStack;
         private String authorNickname;
         private int likes;
         private int views;
@@ -39,7 +43,7 @@ public class ProjectDto {
             this.id = project.getId();
             this.title = project.getTitle();
             this.description = project.getDescription();
-            this.techStack = project.getTechStack();
+            this.techStack = convertStringToList(project.getTechStack());
             this.authorNickname = project.getAuthor().getNickname();
             this.likes = project.getLikes();
             this.views = project.getViews();
@@ -47,5 +51,17 @@ public class ProjectDto {
             this.updatedAt = project.getUpdatedAt();
             this.deadline = project.getDeadline();
         }
+    }
+
+    public static String convertListToString(List<String> techStack) {
+        return techStack != null ? String.join(",", techStack) : null;
+    }
+
+    public static List<String> convertStringToList(String techStackStr) {
+        return techStackStr != null && !techStackStr.isBlank()
+                ? Arrays.stream(techStackStr.split(","))
+                .map(String::trim)
+                .collect(Collectors.toList())
+                : new ArrayList<>();
     }
 }
