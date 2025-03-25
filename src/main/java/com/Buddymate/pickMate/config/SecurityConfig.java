@@ -31,7 +31,9 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/signup", "/api/auth/login").permitAll() // 로그인, 회원가입 인증 필요 X
+                        .requestMatchers("/api/auth/signup", "/api/auth/login",
+                                "api/projects/**", "api/projects/all",
+                                "api/studies/**", "api/studies/all").permitAll() // 로그인, 회원가입 인증 필요 X
                         .anyRequest().authenticated() // 나머지 요청은 인증 필요
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
