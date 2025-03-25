@@ -1,6 +1,7 @@
 package com.Buddymate.pickMate.dto;
 
 import com.Buddymate.pickMate.entity.Project;
+import com.Buddymate.pickMate.enums.ApplicationStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -38,6 +39,7 @@ public class ProjectDto {
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
         private LocalDateTime deadline;
+        private ApplicationStatus applicationStatus;
 
         public Response(Project project) {
             this.id = project.getId();

@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import static com.Buddymate.pickMate.utils.JwtUtils.extractTokenFromRequest;
 import java.util.List;
 
 @RestController
@@ -20,7 +20,8 @@ public class StudyController {
 
     @PostMapping("/addStudy")
     public ResponseEntity<StudyDto.Response> createStudy(HttpServletRequest request, @RequestBody StudyDto.CreateRequest createRequest) {
-        String email = jwtTokenProvider.getEmailFromToken(extractTokenFromRequest(request));
+        String email = jwtTokenProvider.getEmailFromToken(
+                extractTokenFromRequest(request));
 
         return ResponseEntity.ok(studyService.createStudy(email, createRequest));
     }
@@ -39,19 +40,16 @@ public class StudyController {
     public ResponseEntity<StudyDto.Response> updateStudy(HttpServletRequest request,
                                                          @PathVariable Long id,
                                                          @RequestBody StudyDto.CreateRequest updateReqeust) {
-        String email = jwtTokenProvider.getEmailFromToken(extractTokenFromRequest(request));
+        String email = jwtTokenProvider.getEmailFromToken(
+                extractTokenFromRequest(request));
         return ResponseEntity.ok(studyService.updateStudy(email, id ,updateReqeust));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteStudy(HttpServletRequest request, @PathVariable Long id) {
-        String email = jwtTokenProvider.getEmailFromToken(extractTokenFromRequest(request));
+        String email = jwtTokenProvider.getEmailFromToken(
+                extractTokenFromRequest(request));
         studyService.deleteStudy(email, id);
         return ResponseEntity.ok("스터디 게시글이 삭제되었습니다.");
-    }
-
-    private String extractTokenFromRequest(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        return (bearerToken != null && bearerToken.startsWith("Bearer ")) ? bearerToken.substring(7) : null;
     }
 }

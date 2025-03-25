@@ -10,17 +10,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import static com.Buddymate.pickMate.utils.JwtUtils.extractTokenFromRequest;
 
 @Slf4j
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/my")
 @RequiredArgsConstructor
 public class UserController {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final UserService userService;
 
-    @GetMapping("/auth/my")
+    @GetMapping("/info")
     public ResponseEntity<?> getUserInfo(HttpServletRequest request) {
         // 요청 헤더에서 Authorization 가져오기
         String token = extractTokenFromRequest(request);
@@ -44,12 +45,4 @@ public class UserController {
         return ResponseEntity.ok(userInfo);
     }
 
-    private String extractTokenFromRequest(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
-        }
-
-        return null;
-    }
 }
