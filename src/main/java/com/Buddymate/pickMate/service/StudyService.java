@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -68,6 +69,7 @@ public class StudyService {
         study.setTitle(request.getTitle());
         study.setDescription(request.getDescription());
         study.setDeadline(request.getDeadline());
+        study.setUpdatedAt(LocalDateTime.now());
 
         return new StudyDto.Response(study);
     }
