@@ -2,7 +2,10 @@ package com.Buddymate.pickMate.service;
 
 import com.Buddymate.pickMate.dto.StudyDto;
 import com.Buddymate.pickMate.entity.Study;
+import com.Buddymate.pickMate.entity.StudyApplication;
 import com.Buddymate.pickMate.entity.User;
+import com.Buddymate.pickMate.enums.ApplicationStatus;
+import com.Buddymate.pickMate.repository.StudyApplicationRepository;
 import com.Buddymate.pickMate.repository.StudyRepository;
 import com.Buddymate.pickMate.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -12,6 +15,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +25,7 @@ public class StudyService {
 
     private final StudyRepository studyRepository;
     private final UserRepository userRepository;
+    private final StudyApplicationRepository studyApplicationRepository;
 
     // 스터디 게시글 생성
     @Transactional
@@ -48,12 +55,41 @@ public class StudyService {
 
     // 스터디 게시글 단일 조회
     @Transactional
-    public StudyDto.Response getStudyById(Long id) {
+    public StudyDto.Response getStudyById(Long id, String email) {
         Study study = studyRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("스터디를 찾을 수 없습니다."));
 
         study.setViews(study.getViews() + 1); //조회수 1 증가
-        return new StudyDto.Response(study);
+
+        ApplicationStatus applicationStatus = ApplicationStatus.NOT_APPLIED;
+
+        if (email != null && !email.isBlank()) {
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
+
+            Optional<StudyApplication> applicationOpt =
+                    studyApplicationRepository.findByStudyAndApplicant(study, user);
+
+            applicationStatus = applicationOpt.map(StudyApplication::getStatus)
+                    .orElse(ApplicationStatus.NOT_APPLIED);
+        }
+
+        StudyDto.Response response = new StudyDto.Response(study);
+        response.setApplicationStatus(applicationStatus);
+
+        return response;
+    }
+
+    // 내 스터디 게시글 조회
+    @Transactional(readOnly = true)
+    public List<StudyDto.Response> getStudiesByAuthor(String email) {
+        User author = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("유저 정보 없음"));
+
+        return studyRepository.findByAuthor(author).stream()
+                .map(StudyDto.Response::new)
+                .collect(toList());
+
     }
 
     // 스터디 게시글 수정

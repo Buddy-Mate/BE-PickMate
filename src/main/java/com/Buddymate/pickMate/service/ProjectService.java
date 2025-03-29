@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
+
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
@@ -48,7 +50,7 @@ public class ProjectService {
     public List<ProjectDto.Response> getAllProjects() {
         return projectRepository.findAll().stream()
                 .map(ProjectDto.Response::new)
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
     // 프로젝트 단일 조회
@@ -77,6 +79,17 @@ public class ProjectService {
         response.setApplicationStatus(applicationStatus);
 
         return response;
+    }
+
+    // 내가 등록한 프로젝트 조회
+    @Transactional(readOnly = true)
+    public List<ProjectDto.Response> getProjectsByAuthor(String email) {
+        User author = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("유저 정보 없음"));
+
+        return projectRepository.findByAuthor(author).stream()
+                .map(ProjectDto.Response::new)
+                .collect(toList());
     }
 
     // 프로젝트 수정

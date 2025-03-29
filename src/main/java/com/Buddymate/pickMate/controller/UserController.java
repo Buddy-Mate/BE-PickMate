@@ -1,7 +1,11 @@
 package com.Buddymate.pickMate.controller;
 
 import com.Buddymate.pickMate.config.JwtTokenProvider;
+import com.Buddymate.pickMate.dto.ProjectDto;
+import com.Buddymate.pickMate.dto.StudyDto;
 import com.Buddymate.pickMate.dto.UserResponseDto;
+import com.Buddymate.pickMate.service.ProjectService;
+import com.Buddymate.pickMate.service.StudyService;
 import com.Buddymate.pickMate.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +14,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
 import static com.Buddymate.pickMate.utils.JwtUtils.extractTokenFromRequest;
 
 @Slf4j
@@ -20,6 +27,8 @@ public class UserController {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final UserService userService;
+    private final ProjectService projectService;
+    private final StudyService studyService;
 
     @GetMapping("/info")
     public ResponseEntity<?> getUserInfo(HttpServletRequest request) {
@@ -43,6 +52,24 @@ public class UserController {
         UserResponseDto userInfo = userService.getUserByEmail(email);
 
         return ResponseEntity.ok(userInfo);
+    }
+
+    // 내가 등록한 프로젝트 리스트
+    @GetMapping("/projects")
+    public ResponseEntity<List<ProjectDto.Response>> getMyProjects(HttpServletRequest request) {
+        String email = jwtTokenProvider.getEmailFromToken(
+                extractTokenFromRequest(request));
+
+        return ResponseEntity.ok(projectService.getProjectsByAuthor(email));
+    }
+
+    // 내가 등록한 스터디 리스트
+    @GetMapping("/studies")
+    public ResponseEntity<List<StudyDto.Response>> getMyStudies(HttpServletRequest request) {
+        String email = jwtTokenProvider.getEmailFromToken(
+                extractTokenFromRequest(request));
+
+        return ResponseEntity.ok(studyService.getStudiesByAuthor(email));
     }
 
 }

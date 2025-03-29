@@ -18,6 +18,7 @@ public class StudyController {
     private final StudyService studyService;
     private final JwtTokenProvider jwtTokenProvider;
 
+    // 스터디 생성
     @PostMapping("/addStudy")
     public ResponseEntity<StudyDto.Response> createStudy(HttpServletRequest request, @RequestBody StudyDto.CreateRequest createRequest) {
         String email = jwtTokenProvider.getEmailFromToken(
@@ -26,14 +27,24 @@ public class StudyController {
         return ResponseEntity.ok(studyService.createStudy(email, createRequest));
     }
 
+    // 전체 스터디 조회
     @GetMapping("/all")
     public ResponseEntity<List<StudyDto.Response>> getAllStudies() {
         return ResponseEntity.ok(studyService.getAllStudies());
     }
 
+    // 단일 스터디 조회 (조회수 증가)
     @GetMapping("/{id}")
-    public ResponseEntity<StudyDto.Response> getStudyById(@PathVariable Long id) {
-        return ResponseEntity.ok(studyService.getStudyById(id));
+    public ResponseEntity<StudyDto.Response> getStudyById(@PathVariable Long id, HttpServletRequest request) {
+
+        String token = extractTokenFromRequest(request);
+        String email = null;
+
+        if (token != null && jwtTokenProvider.validateToken(token)) {
+            email = jwtTokenProvider.getEmailFromToken(token);
+        }
+
+        return ResponseEntity.ok(studyService.getStudyById(id, email));
     }
 
     @PutMapping("/{id}")

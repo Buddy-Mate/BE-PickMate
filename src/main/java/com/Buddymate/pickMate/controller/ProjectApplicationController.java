@@ -31,6 +31,15 @@ public class ProjectApplicationController {
         return ResponseEntity.ok(projectApplicationService.apply(email, projectId, createRequest));
     }
 
+    // 내가 신청한 프로젝트
+    @GetMapping("/applied")
+    public ResponseEntity<List<ProjectApplicationDto.Response>> getMyAppliedProjects(HttpServletRequest request) {
+        String email =jwtTokenProvider.getEmailFromToken(
+                extractTokenFromRequest(request));
+
+        return ResponseEntity.ok(projectApplicationService.getApplicationsByApplicant(email));
+    }
+
     // 특정 프로젝트에 들어온 신청자 목록 조회
     @GetMapping("/received/{projectId}")
     public ResponseEntity<List<ProjectApplicationDto.Response>> getApplicantsByProject(@PathVariable Long projectId,

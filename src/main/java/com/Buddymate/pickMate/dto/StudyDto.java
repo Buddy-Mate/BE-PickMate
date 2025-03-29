@@ -1,6 +1,7 @@
 package com.Buddymate.pickMate.dto;
 
 import com.Buddymate.pickMate.entity.Study;
+import com.Buddymate.pickMate.enums.ApplicationStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,7 +20,7 @@ public class StudyDto {
         private LocalDateTime deadline;
     }
 
-    @Getter
+    @Getter @Setter
     public static class Response {
         private Long id;
         private String title;
@@ -30,6 +31,7 @@ public class StudyDto {
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
         private LocalDateTime deadline;
+        private ApplicationStatus applicationStatus;
 
         public Response(Study study) {
             this.id = study.getId();
