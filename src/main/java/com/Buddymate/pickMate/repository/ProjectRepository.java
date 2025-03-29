@@ -2,6 +2,7 @@ package com.Buddymate.pickMate.repository;
 
 import com.Buddymate.pickMate.entity.Project;
 import com.Buddymate.pickMate.entity.ProjectApplication;
+import com.Buddymate.pickMate.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -17,4 +18,6 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     @Modifying
     @Query("UPDATE Project p SET p.views = p.views + 1 WHERE p.id = :id")
     void increaseViewCount(@Param("id") Long id);
+
+    List<Project> findByAuthor(User author);
 }
