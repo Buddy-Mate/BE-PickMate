@@ -112,6 +112,22 @@ public class StudyApplicationService {
         app.setStatus(ApplicationStatus.REJECTED);
     }
 
+    // 스터디 신청 취소
+    @Transactional
+    public void cancelApplication(Long applicationId, String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("유저 정보 없음"));
+
+        StudyApplication studyApplication = studyApplicationRepository.findById(applicationId)
+                .orElseThrow(() -> new IllegalArgumentException("신청 정보 없음"));
+
+        if (!studyApplication.getApplicant().getUserId().equals(user.getUserId())) {
+            throw new IllegalArgumentException("본인 신청만 취소할 수 있습니다.");
+        }
+
+        studyApplicationRepository.delete(studyApplication);
+    }
+
     private StudyApplicationDto.Response toDto(StudyApplication app) {
         return StudyApplicationDto.Response.builder()
                 .applicationId(app.getId())

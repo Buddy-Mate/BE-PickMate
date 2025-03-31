@@ -74,4 +74,16 @@ public class ProjectApplicationController {
 
         return ResponseEntity.ok("신청이 거절되었습니다.");
     }
+
+    // 신청 취소 (프로젝트)
+    @DeleteMapping("/{applicationId}")
+    public ResponseEntity<String> cancelProjectApplication(@PathVariable Long applicationId,
+                                                           HttpServletRequest request) {
+        String email = jwtTokenProvider.getEmailFromToken(
+                extractTokenFromRequest(request));
+
+        projectApplicationService.cancelApplication(applicationId, email);
+
+        return ResponseEntity.ok("프로젝트 신청이 취소되었습니다.");
+    }
 }

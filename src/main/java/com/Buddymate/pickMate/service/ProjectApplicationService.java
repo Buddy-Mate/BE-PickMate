@@ -111,6 +111,23 @@ public class ProjectApplicationService {
         app.setStatus(ApplicationStatus.REJECTED);
     }
 
+    @Transactional
+    public void cancelApplication(Long applicationId, String eamil) {
+        User user = userRepository.findByEmail(eamil)
+                .orElseThrow(() -> new IllegalArgumentException("유저 정보 없음"));
+
+        ProjectApplication projectApplication = projectApplicationRepository.findById(applicationId)
+                .orElseThrow(() -> new IllegalArgumentException("신청 정보 없음"));
+
+
+        // 본인 신청인지 확인
+        if (!projectApplication.getApplicant().getUserId().equals(user.getUserId())) {
+            throw new IllegalArgumentException("본인 신청만 취소할 수 있습니다.");
+        }
+
+        projectApplicationRepository.delete(projectApplication);
+    }
+
     private ProjectApplicationDto.Response toDto(ProjectApplication app) {
         return ProjectApplicationDto.Response.builder()
                 .applicationId(app.getId())
