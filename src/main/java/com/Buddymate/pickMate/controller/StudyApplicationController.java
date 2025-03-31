@@ -83,4 +83,16 @@ public class StudyApplicationController {
 
         return ResponseEntity.ok("신청이 거절되었습니다.");
     }
+
+    // 신청 취소 (스터디)
+    @DeleteMapping("/{applicationId}")
+    public ResponseEntity<String> cancelStudyApplication(@PathVariable Long applicationId,
+                                                           HttpServletRequest request) {
+        String email = jwtTokenProvider.getEmailFromToken(
+                extractTokenFromRequest(request));
+
+        studyApplicationService.cancelApplication(applicationId, email);
+
+        return ResponseEntity.ok("프로젝트 신청이 취소되었습니다.");
+    }
 }
