@@ -19,6 +19,7 @@ public class StudyApplicationDto {
     @Builder
     public static class Response {
         private Long applicationId;
+        private Long studyId;
         private String studyTitle;
         private String applicantNickname;
         private String message;
