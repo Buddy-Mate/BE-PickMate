@@ -131,6 +131,7 @@ public class ProjectApplicationService {
     private ProjectApplicationDto.Response toDto(ProjectApplication app) {
         return ProjectApplicationDto.Response.builder()
                 .applicationId(app.getId())
+                .projectId(app.getProject().getId())
                 .projectTitle(app.getProject().getTitle())
                 .applicantNickname(app.getApplicant().getNickname())
                 .message(app.getMessage())

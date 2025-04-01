@@ -131,6 +131,7 @@ public class StudyApplicationService {
     private StudyApplicationDto.Response toDto(StudyApplication app) {
         return StudyApplicationDto.Response.builder()
                 .applicationId(app.getId())
+                .studyId(app.getStudy().getId())
                 .studyTitle(app.getStudy().getTitle())
                 .applicantNickname(app.getApplicant().getNickname())
                 .message(app.getMessage())
