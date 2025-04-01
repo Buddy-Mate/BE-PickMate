@@ -18,6 +18,7 @@ public class ProjectApplicationDto {
     @Builder
     public static class Response {
         private Long applicationId;
+        private Long projectId;
         private String projectTitle;
         private String applicantNickname;
         private String message;
