@@ -3,9 +3,11 @@ package com.Buddymate.pickMate.service;
 import com.Buddymate.pickMate.dto.ProjectDto;
 import com.Buddymate.pickMate.entity.Project;
 import com.Buddymate.pickMate.entity.ProjectApplication;
+import com.Buddymate.pickMate.entity.ProjectLike;
 import com.Buddymate.pickMate.entity.User;
 import com.Buddymate.pickMate.enums.ApplicationStatus;
 import com.Buddymate.pickMate.repository.ProjectApplicationRepository;
+import com.Buddymate.pickMate.repository.ProjectLikeRepository;
 import com.Buddymate.pickMate.repository.ProjectRepository;
 import com.Buddymate.pickMate.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
     private final ProjectApplicationRepository projectApplicationRepository;
+    private final ProjectLikeRepository projectLikeRepository;
 
     // 프로젝트 생성 (트랜잭션 처리)
     @Transactional
@@ -122,5 +125,46 @@ public class ProjectService {
         }
 
         projectRepository.delete(project);
+    }
+
+    // 프로젝트 좋아요
+    @Transactional
+    public void likeProject(String email, Long projectId) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("유저 정보를 찾을 수 없습니다"));
+
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new IllegalArgumentException("프로젝트를 찾을 수 없습니다."));
+
+        if (projectLikeRepository.findByUserAndProject(user, project).isPresent()) {
+            throw new IllegalArgumentException("이미 좋아요를 눌렀습니다.");
+        }
+
+        projectLikeRepository.save(ProjectLike.builder()
+                .user(user)
+                .project(project)
+                .build());
+
+        project.setLikes(project.getLikes() + 1);
+
+    }
+
+    // 프로젝트 좋아요 취소
+    @Transactional
+    public void unlikeProject(String email, Long projectId) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("유저 정보를 찾을 수 없습니다."));
+
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new IllegalArgumentException("프로젝트 정보를 찾을 수 없습니다."));
+
+        ProjectLike like = projectLikeRepository.findByUserAndProject(user, project)
+                .orElseThrow(() -> new IllegalArgumentException("좋아요를 누르지 않았습니다."));
+
+        projectLikeRepository.delete(like);
+
+        project.setLikes(project.getLikes() - 1);
     }
 }

@@ -77,4 +77,31 @@ public class ProjectController {
         return ResponseEntity.ok().build();
     }
 
+    // 프로젝트 좋아요
+    @PostMapping("/{id}/like")
+    public ResponseEntity<String> likeProject(@PathVariable Long id,
+                                              HttpServletRequest request) {
+
+        String email = jwtTokenProvider.getEmailFromToken(
+                extractTokenFromRequest(request));
+
+        projectService.likeProject(email, id);
+
+        return ResponseEntity.ok("이 게시글을 좋아합니다.");
+    }
+
+    // 프로젝트 좋아요 취소
+    @DeleteMapping("/{id}/like")
+    public ResponseEntity<String> unlikeProject(@PathVariable Long id,
+                                                HttpServletRequest request) {
+
+        String email = jwtTokenProvider.getEmailFromToken(
+                extractTokenFromRequest(request));
+
+        projectService.unlikeProject(email, id);
+
+        return ResponseEntity.ok("이 게시글의 좋아요를 취소합니다.");
+    }
+
+
 }
