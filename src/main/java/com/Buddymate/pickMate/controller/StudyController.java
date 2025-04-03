@@ -63,4 +63,30 @@ public class StudyController {
         studyService.deleteStudy(email, id);
         return ResponseEntity.ok("스터디 게시글이 삭제되었습니다.");
     }
+
+    // 스터디 좋아요
+    @PostMapping("/{id}/like")
+    public ResponseEntity<String> likeStudy(@PathVariable Long id,
+                                            HttpServletRequest request) {
+
+        String email = jwtTokenProvider.getEmailFromToken(
+                extractTokenFromRequest(request));
+
+        studyService.likeStudy(email, id);
+
+        return ResponseEntity.ok("이 스터디 게시글을 좋아합니다.");
+    }
+
+    // 스터디 좋아요 취소
+    @DeleteMapping("{id}/like")
+    public ResponseEntity<String> unlikeStudy(@PathVariable Long id,
+                                              HttpServletRequest request) {
+
+        String email = jwtTokenProvider.getEmailFromToken(
+                extractTokenFromRequest(request));
+
+        studyService.unlikeStudy(email, id);
+
+        return ResponseEntity.ok("스터디 게시글 좋아요를 취소합니다.");
+    }
 }
