@@ -103,5 +103,9 @@ public class ProjectController {
         return ResponseEntity.ok("이 게시글의 좋아요를 취소합니다.");
     }
 
-
+    // 프로젝트 검색
+    @GetMapping("/search")
+    public ResponseEntity<List<ProjectDto.Response>> searchProjects(@RequestParam("keyword") String keyword) {
+        return ResponseEntity.ok(projectService.searchProjectsByKeyword(keyword));
+    }
 }

@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ProjectRepository extends JpaRepository<Project, Long> {
-    List<Project> findByTitleContaining(String keyword);
+    List<Project> findByTitleContainingIgnoreCase(String keyword);
 
     // 조회수 증가 쿼리
     @Modifying

@@ -168,4 +168,16 @@ public class StudyService {
         study.setLikes(study.getLikes() - 1);
 
     }
+
+    // 스터디 검색
+    @Transactional(readOnly = true)
+    public List<StudyDto.Response> searchStudiesByKeyword(String keyword) {
+
+        List<Study> studyList = studyRepository.findByTitleContainingIgnoreCase(keyword);
+
+        return studyList.stream()
+                .map(StudyDto.Response::new)
+                .collect(toList());
+    }
+
 }

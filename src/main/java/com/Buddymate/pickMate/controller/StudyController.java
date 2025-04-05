@@ -89,4 +89,10 @@ public class StudyController {
 
         return ResponseEntity.ok("스터디 게시글 좋아요를 취소합니다.");
     }
+
+    // 스터디 검색
+    @GetMapping("/search")
+    public ResponseEntity<List<StudyDto.Response>> searchStudies(@RequestParam("keyword") String keyword) {
+        return ResponseEntity.ok(studyService.searchStudiesByKeyword(keyword));
+    }
 }
