@@ -167,4 +167,15 @@ public class ProjectService {
 
         project.setLikes(project.getLikes() - 1);
     }
+
+    // 프로젝트 검색
+    @Transactional(readOnly = true)
+    public List<ProjectDto.Response> searchProjectsByKeyword(String keyword) {
+
+        List<Project> projectList = projectRepository.findByTitleContainingIgnoreCase(keyword);
+
+        return projectList.stream()
+                .map(ProjectDto.Response::new)
+                .collect(toList());
+    }
 }
