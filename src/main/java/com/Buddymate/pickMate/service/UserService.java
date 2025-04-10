@@ -1,6 +1,7 @@
 package com.Buddymate.pickMate.service;
 
 import com.Buddymate.pickMate.dto.UserResponseDto;
+import com.Buddymate.pickMate.dto.UserUpdateRequestDto;
 import com.Buddymate.pickMate.entity.User;
 import com.Buddymate.pickMate.exception.CustomException;
 import com.Buddymate.pickMate.repository.UserRepository;
@@ -8,7 +9,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Service
@@ -49,5 +52,22 @@ public class UserService {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없음"));
 
         return new UserResponseDto(user);
+    }
+
+    // User 정보 수정
+    @Transactional
+    public void updateUser(String email, UserUpdateRequestDto dto) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        if (dto.getNickname() != null && !user.getNickname().equals(dto.getNickname())) {
+            if (userRepository.existsByNickname(dto.getNickname())) {
+                throw new IllegalArgumentException("이미 사용중인 닉네임입니다.");
+            }
+
+            user.setNickname(dto.getNickname());
+        }
+
+        user.setIntroduction(dto.getIntroduction());
     }
 }

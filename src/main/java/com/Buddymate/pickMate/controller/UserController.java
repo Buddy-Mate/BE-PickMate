@@ -4,6 +4,7 @@ import com.Buddymate.pickMate.config.JwtTokenProvider;
 import com.Buddymate.pickMate.dto.ProjectDto;
 import com.Buddymate.pickMate.dto.StudyDto;
 import com.Buddymate.pickMate.dto.UserResponseDto;
+import com.Buddymate.pickMate.dto.UserUpdateRequestDto;
 import com.Buddymate.pickMate.service.ProjectService;
 import com.Buddymate.pickMate.service.StudyService;
 import com.Buddymate.pickMate.service.UserService;
@@ -11,9 +12,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -52,6 +51,18 @@ public class UserController {
         UserResponseDto userInfo = userService.getUserByEmail(email);
 
         return ResponseEntity.ok(userInfo);
+    }
+
+    //한줄 소개 및 닉네임 수정
+    @PutMapping("/update")
+    public ResponseEntity<String> updateUser (HttpServletRequest request,
+                                              @RequestBody UserUpdateRequestDto dto) {
+        String email = jwtTokenProvider.getEmailFromToken(
+                extractTokenFromRequest(request));
+
+        userService.updateUser(email, dto);
+
+        return ResponseEntity.ok("사용자 정보가 업데이트 되었습니다.");
     }
 
     // 내가 등록한 프로젝트 리스트
