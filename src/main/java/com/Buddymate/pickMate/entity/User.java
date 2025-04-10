@@ -28,6 +28,9 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
+    @Column(length = 1000)
+    private String introduction;
+
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt = new Date();
 
