@@ -1,3 +1,15 @@
 jwt:
   secret-key: ${JWT_SECRET}
   expiration-time: 864000000 # 1일
+
+# S3
+cloud:
+  aws:
+    s3:
+      bucket: pickmate-bucket
+      stack.auto: false
+      region.static: ap-northeast-2
+      credentials:
+        accessKey: ${S3_ACCESS_KEY}
+        secretKey: ${S3_SECRET_KEY}
+
