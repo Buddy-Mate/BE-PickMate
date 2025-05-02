@@ -11,8 +11,10 @@ import com.Buddymate.pickMate.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -54,13 +56,14 @@ public class UserController {
     }
 
     //한줄 소개 및 닉네임 수정
-    @PutMapping("/update")
+    @PutMapping(value = "/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> updateUser (HttpServletRequest request,
-                                              @RequestBody UserUpdateRequestDto dto) {
+                                              @RequestPart(value = "data") UserUpdateRequestDto dto,
+                                              @RequestPart(value = "image", required = false) MultipartFile imageFile) {
         String email = jwtTokenProvider.getEmailFromToken(
                 extractTokenFromRequest(request));
 
-        userService.updateUser(email, dto);
+        userService.updateUser(email, dto, imageFile);
 
         return ResponseEntity.ok("사용자 정보가 업데이트 되었습니다.");
     }

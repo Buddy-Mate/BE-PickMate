@@ -31,6 +31,9 @@ public class User implements UserDetails {
     @Column(length = 1000)
     private String introduction;
 
+    @Column
+    private String profileImageUrl;
+
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt = new Date();
 
