@@ -6,6 +6,8 @@ import com.Buddymate.pickMate.entity.ProjectApplication;
 import com.Buddymate.pickMate.entity.ProjectLike;
 import com.Buddymate.pickMate.entity.User;
 import com.Buddymate.pickMate.enums.ApplicationStatus;
+import com.Buddymate.pickMate.exception.BusinessException;
+import com.Buddymate.pickMate.exception.ErrorCode;
 import com.Buddymate.pickMate.repository.ProjectApplicationRepository;
 import com.Buddymate.pickMate.repository.ProjectLikeRepository;
 import com.Buddymate.pickMate.repository.ProjectRepository;
@@ -34,7 +36,7 @@ public class ProjectService {
     @Transactional
     public ProjectDto.Response createProject(String email, ProjectDto.CreateRequest request) {
         User author = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         Project project = Project.builder()
                 .title(request.getTitle())
@@ -61,7 +63,7 @@ public class ProjectService {
     public ProjectDto.Response getProjectById(Long id, String email) {
 
         Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("프로젝트를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.PROJECT_NOT_FOUND));
 
         project.setViews(project.getViews() + 1);
 
@@ -69,7 +71,7 @@ public class ProjectService {
 
         if (email != null && !email.isBlank()) {
             User user = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
+                    .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
             Optional<ProjectApplication> applicationOpt =
                     projectApplicationRepository.findByProjectAndApplicant(project, user);
@@ -88,7 +90,7 @@ public class ProjectService {
     @Transactional(readOnly = true)
     public List<ProjectDto.Response> getProjectsByAuthor(String email) {
         User author = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("유저 정보 없음"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         return projectRepository.findByAuthor(author).stream()
                 .map(ProjectDto.Response::new)
@@ -99,10 +101,10 @@ public class ProjectService {
     @Transactional
     public ProjectDto.Response updateProject(String email, Long id, ProjectDto.CreateRequest request) {
         Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("프로젝트를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.PROJECT_NOT_FOUND));
 
         if (!project.getAuthor().getEmail().equals(email)) {
-            throw new IllegalArgumentException("수정 권한이 없습니다.");
+            throw new BusinessException(ErrorCode.PROJECT_INVALID_UPDATE);
         }
 
         project.setTitle(request.getTitle());
@@ -118,10 +120,10 @@ public class ProjectService {
     @Transactional
     public void deleteProject(String email, Long id) {
         Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("프로젝트를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.PROJECT_NOT_FOUND));
 
         if (!project.getAuthor().getEmail().equals(email)) {
-            throw new IllegalArgumentException("삭제 권한이 없습니다.");
+            throw new BusinessException(ErrorCode.PROJECT_INVALID_DELETE);
         }
 
         projectRepository.delete(project);
@@ -132,13 +134,13 @@ public class ProjectService {
     public void likeProject(String email, Long projectId) {
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("유저 정보를 찾을 수 없습니다"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new IllegalArgumentException("프로젝트를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.PROJECT_NOT_FOUND));
 
         if (projectLikeRepository.findByUserAndProject(user, project).isPresent()) {
-            throw new IllegalArgumentException("이미 좋아요를 눌렀습니다.");
+            throw new BusinessException(ErrorCode.PROJECT_LIKE_DUPLICATE);
         }
 
         projectLikeRepository.save(ProjectLike.builder()
@@ -155,13 +157,13 @@ public class ProjectService {
     public void unlikeProject(String email, Long projectId) {
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("유저 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new IllegalArgumentException("프로젝트 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.PROJECT_NOT_FOUND));
 
         ProjectLike like = projectLikeRepository.findByUserAndProject(user, project)
-                .orElseThrow(() -> new IllegalArgumentException("좋아요를 누르지 않았습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.PROJECT_LIKE_NOT_FOUND));
 
         projectLikeRepository.delete(like);
 

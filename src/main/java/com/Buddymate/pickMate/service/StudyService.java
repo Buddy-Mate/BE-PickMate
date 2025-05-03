@@ -6,6 +6,8 @@ import com.Buddymate.pickMate.entity.StudyApplication;
 import com.Buddymate.pickMate.entity.StudyLike;
 import com.Buddymate.pickMate.entity.User;
 import com.Buddymate.pickMate.enums.ApplicationStatus;
+import com.Buddymate.pickMate.exception.BusinessException;
+import com.Buddymate.pickMate.exception.ErrorCode;
 import com.Buddymate.pickMate.repository.StudyApplicationRepository;
 import com.Buddymate.pickMate.repository.StudyLikeRepository;
 import com.Buddymate.pickMate.repository.StudyRepository;
@@ -34,7 +36,7 @@ public class StudyService {
     @Transactional
     public StudyDto.Response createStudy(String email, StudyDto.CreateRequest request) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("사용자 정보 없음"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         Study study = Study.builder()
                 .title(request.getTitle())
@@ -60,7 +62,7 @@ public class StudyService {
     @Transactional
     public StudyDto.Response getStudyById(Long id, String email) {
         Study study = studyRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("스터디를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.STUDY_NOT_FOUND));
 
         study.setViews(study.getViews() + 1); //조회수 1 증가
 
@@ -68,7 +70,7 @@ public class StudyService {
 
         if (email != null && !email.isBlank()) {
             User user = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
+                    .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
             Optional<StudyApplication> applicationOpt =
                     studyApplicationRepository.findByStudyAndApplicant(study, user);
@@ -87,7 +89,7 @@ public class StudyService {
     @Transactional(readOnly = true)
     public List<StudyDto.Response> getStudiesByAuthor(String email) {
         User author = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("유저 정보 없음"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         return studyRepository.findByAuthor(author).stream()
                 .map(StudyDto.Response::new)
@@ -99,10 +101,10 @@ public class StudyService {
     @Transactional
     public StudyDto.Response updateStudy(String email, Long id, StudyDto.CreateRequest request) {
         Study study = studyRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("스터디를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.STUDY_NOT_FOUND));
 
         if (!study.getAuthor().getEmail().equals(email)) {
-            throw new SecurityException("수정 권한이 없습니다.");
+            throw new BusinessException(ErrorCode.STUDY_INVALID_UPDATE);
         }
 
         study.setTitle(request.getTitle());
@@ -117,10 +119,10 @@ public class StudyService {
     @Transactional
     public void deleteStudy(String email, Long id) {
         Study study = studyRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("스터디를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.STUDY_NOT_FOUND));
 
         if (!study.getAuthor().getEmail().equals(email)) {
-            throw new SecurityException("삭제 권한이 없습니다.");
+            throw new BusinessException(ErrorCode.STUDY_INVALID_DELETE);
         }
 
         studyRepository.delete(study);
@@ -132,13 +134,13 @@ public class StudyService {
     public void likeStudy(String email, Long id) {
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("유저 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         Study study = studyRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("스터디 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.STUDY_NOT_FOUND));
 
         if (studyLikeRepository.findByUserAndStudy(user, study).isPresent()) {
-            throw new IllegalStateException("이미 좋아요를 눌렀습니다.");
+            throw new BusinessException(ErrorCode.STUDY_LIKE_DUPLICATE);
         }
 
         studyLikeRepository.save(StudyLike.builder()
@@ -155,13 +157,13 @@ public class StudyService {
     public void unlikeStudy(String email, Long id) {
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("유저 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         Study study = studyRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("스터디 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.STUDY_NOT_FOUND));
 
         StudyLike like = studyLikeRepository.findByUserAndStudy(user, study)
-                .orElseThrow(() -> new IllegalStateException("좋아요를 누르지 않았습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.STUDY_LIKE_NOT_FOUND));
 
         studyLikeRepository.delete(like);
 

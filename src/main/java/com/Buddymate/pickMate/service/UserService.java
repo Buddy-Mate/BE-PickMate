@@ -30,13 +30,12 @@ public class UserService {
 
         // 이메일 중복 체크
         if (userRepository.findByEmail(email).isPresent()) {
-            throw new CustomException(HttpStatus.BAD_REQUEST, "이미 존재하는 이메일입니다.");
-
+            throw new BusinessException(ErrorCode.DUPLICATE_EMAIL);
         }
 
         // 닉네임 중복 체크
         if (userRepository.findByNickname(nickname).isPresent()) {
-            throw new CustomException(HttpStatus.BAD_REQUEST, "이미 존재하는 닉네임입니다.");
+            throw new BusinessException(ErrorCode.DUPLICATE_NICKNAME);
         }
 
         // 비밀번호 암호화
@@ -54,8 +53,8 @@ public class UserService {
 
     // 사용자 정보 조회 메소드
     public UserResponseDto getUserByEmail(String email) {
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없음"));
-
+        User user = userRepository.findByEmail(email).
+                orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
         return new UserResponseDto(user);
     }
 

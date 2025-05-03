@@ -5,6 +5,8 @@ import com.Buddymate.pickMate.entity.Project;
 import com.Buddymate.pickMate.entity.ProjectApplication;
 import com.Buddymate.pickMate.entity.User;
 import com.Buddymate.pickMate.enums.ApplicationStatus;
+import com.Buddymate.pickMate.exception.BusinessException;
+import com.Buddymate.pickMate.exception.ErrorCode;
 import com.Buddymate.pickMate.repository.ProjectApplicationRepository;
 import com.Buddymate.pickMate.repository.ProjectRepository;
 import com.Buddymate.pickMate.repository.UserRepository;
@@ -31,13 +33,13 @@ public class ProjectApplicationService {
     // 프로젝트 신청
     public ProjectApplicationDto.Response apply(String email, Long projectId, ProjectApplicationDto.CreateRequest request) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new RuntimeException("프로젝트를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.PROJECT_NOT_FOUND));
 
         if (project.getAuthor().getUserId().equals(user.getUserId())) {
-            throw new IllegalStateException("자신의 프로젝트에는 신청할 수 없습니다.");
+            throw new BusinessException(ErrorCode.PROJECT_SELF_APPLICATION_NOT_ALLOWED);
         }
 
         ProjectApplication application = ProjectApplication.builder()
@@ -55,7 +57,7 @@ public class ProjectApplicationService {
     @Transactional(readOnly = true)
     public List<ProjectApplicationDto.Response> getApplicationsByApplicant(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("유저 없음"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         return projectApplicationRepository.findByApplicant(user).stream()
                 .map(this::toDto)
@@ -65,7 +67,7 @@ public class ProjectApplicationService {
     @Transactional(readOnly = true)
     public List<ProjectApplicationDto.Response> getApplicationsByAuthor(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("유저 없음"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         return projectApplicationRepository.findByProject_Author(user).stream()
                 .map(this::toDto)
@@ -75,12 +77,12 @@ public class ProjectApplicationService {
     @Transactional(readOnly = true)
     public List<ProjectApplicationDto.Response> getApplicationsByProjectIdAndAuthor(String email, Long projectId) {
         User author = userRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("작성자 없음"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
         Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new EntityNotFoundException("프로젝트 없음"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.PROJECT_NOT_FOUND));
 
         if (!project.getAuthor().getUserId().equals(author.getUserId())) {
-            throw new IllegalArgumentException("신청자 목록을 조회할 권한이 없습니다.");
+            throw new BusinessException(ErrorCode.PROJECT_APPLICATION_ACCESS_DENIED);
         }
 
         return projectApplicationRepository.findByProject(project).stream()
@@ -91,10 +93,10 @@ public class ProjectApplicationService {
     @Transactional
     public void acceptApplication(String email,Long applicationId, String openLink) {
         User author = userRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("작성자 정보 없음"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         ProjectApplication app = projectApplicationRepository.findByIdAndProject_Author(applicationId, author)
-                .orElseThrow(() -> new EntityNotFoundException("신청 정보 없음"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.PROJECT_APPLICATION_NOT_FOUND));
 
         app.setStatus(ApplicationStatus.ACCEPTED);
         app.setOpenLink(openLink);
@@ -103,10 +105,10 @@ public class ProjectApplicationService {
     @Transactional
     public void rejectApplication(String email, Long applicationId) {
         User author = userRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("작성자 정보 없음"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         ProjectApplication app = projectApplicationRepository.findByIdAndProject_Author(applicationId, author)
-                .orElseThrow(() -> new EntityNotFoundException("신청 정보 없음"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.PROJECT_APPLICATION_NOT_FOUND));
 
         app.setStatus(ApplicationStatus.REJECTED);
     }
@@ -114,15 +116,15 @@ public class ProjectApplicationService {
     @Transactional
     public void cancelApplication(Long applicationId, String eamil) {
         User user = userRepository.findByEmail(eamil)
-                .orElseThrow(() -> new IllegalArgumentException("유저 정보 없음"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         ProjectApplication projectApplication = projectApplicationRepository.findById(applicationId)
-                .orElseThrow(() -> new IllegalArgumentException("신청 정보 없음"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.PROJECT_APPLICATION_NOT_FOUND));
 
 
         // 본인 신청인지 확인
         if (!projectApplication.getApplicant().getUserId().equals(user.getUserId())) {
-            throw new IllegalArgumentException("본인 신청만 취소할 수 있습니다.");
+            throw new BusinessException(ErrorCode.PROJECT_APPLICATION_CANCEL_DENIED);
         }
 
         projectApplicationRepository.delete(projectApplication);
