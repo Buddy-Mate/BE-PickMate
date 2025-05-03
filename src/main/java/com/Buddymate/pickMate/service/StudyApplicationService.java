@@ -5,6 +5,8 @@ import com.Buddymate.pickMate.entity.Study;
 import com.Buddymate.pickMate.entity.User;
 import com.Buddymate.pickMate.entity.StudyApplication;
 import com.Buddymate.pickMate.enums.ApplicationStatus;
+import com.Buddymate.pickMate.exception.BusinessException;
+import com.Buddymate.pickMate.exception.ErrorCode;
 import com.Buddymate.pickMate.repository.StudyRepository;
 import com.Buddymate.pickMate.repository.UserRepository;
 import com.Buddymate.pickMate.repository.StudyApplicationRepository;
@@ -29,13 +31,13 @@ public class StudyApplicationService {
     // 스터디 신청
     public StudyApplicationDto.Response apply(String email, Long studyId, StudyApplicationDto.CreateRequest request) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         Study study = studyRepository.findById(studyId)
-                .orElseThrow(() -> new IllegalArgumentException("스터디를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.STUDY_NOT_FOUND));
 
         if (study.getAuthor().getUserId().equals(user.getUserId())) {
-            throw new IllegalArgumentException("자신의 스터디에 신청할 수 없습니다.");
+            throw new BusinessException(ErrorCode.STUDY_SELF_APPLICATION_NOT_ALLOWED);
         }
 
         StudyApplication application = StudyApplication.builder()
@@ -53,7 +55,7 @@ public class StudyApplicationService {
     @Transactional(readOnly = true)
     public List<StudyApplicationDto.Response> getApplicationsByApplicant(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("유저 정보 없음"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         return studyApplicationRepository.findByApplicant(user).stream()
                 .map(this::toDto)
@@ -63,7 +65,7 @@ public class StudyApplicationService {
     // 내가 스터디에 신청한 현황
     public List<StudyApplicationDto.Response> getApplicationsByAuthor(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("유저 정보 없음"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         return studyApplicationRepository.findByStudy_Author(user).stream()
                 .map(this::toDto)
@@ -73,13 +75,13 @@ public class StudyApplicationService {
     @Transactional(readOnly = true)
     public List<StudyApplicationDto.Response> getApplicationsByStudyIdAndAuthor(String email, Long studyId) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("유저 정보 없음"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         Study study = studyRepository.findById(studyId)
-                .orElseThrow(() -> new IllegalArgumentException("스터디 정보 없음"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.STUDY_NOT_FOUND));
 
         if (!study.getAuthor().getUserId().equals(user.getUserId())) {
-            throw new IllegalArgumentException("신청자 목록을 조회할 권한이 없습니다.");
+            throw new BusinessException(ErrorCode.STUDY_APPLICATION_ACCESS_DENIED);
         }
 
         return studyApplicationRepository.findByStudy(study).stream()
@@ -91,10 +93,10 @@ public class StudyApplicationService {
     @Transactional
     public void acceptApplication(String email, Long applicationId, String openLink) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("작성자 정보 없음"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         StudyApplication app = studyApplicationRepository.findByIdAndStudy_Author(applicationId, user)
-                .orElseThrow(() -> new EntityNotFoundException("신청 정보 없음"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.STUDY_APPLICATION_NOT_FOUND));
 
         app.setStatus(ApplicationStatus.ACCEPTED);
         app.setOpenLink(openLink);
@@ -104,10 +106,10 @@ public class StudyApplicationService {
     @Transactional
     public void rejectApplication(String email, Long applicationId) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("작성자 정보 없음"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         StudyApplication app = studyApplicationRepository.findByIdAndStudy_Author(applicationId, user)
-                .orElseThrow(() -> new EntityNotFoundException("신청 정보 없음"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.STUDY_APPLICATION_NOT_FOUND));
 
         app.setStatus(ApplicationStatus.REJECTED);
     }
@@ -116,13 +118,13 @@ public class StudyApplicationService {
     @Transactional
     public void cancelApplication(Long applicationId, String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("유저 정보 없음"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         StudyApplication studyApplication = studyApplicationRepository.findById(applicationId)
-                .orElseThrow(() -> new IllegalArgumentException("신청 정보 없음"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.STUDY_APPLICATION_NOT_FOUND));
 
         if (!studyApplication.getApplicant().getUserId().equals(user.getUserId())) {
-            throw new IllegalArgumentException("본인 신청만 취소할 수 있습니다.");
+            throw new BusinessException(ErrorCode.STUDY_APPLICATION_CANCEL_DENIED);
         }
 
         studyApplicationRepository.delete(studyApplication);
