@@ -9,11 +9,13 @@ public class UserResponseDto {
     private String nickname;
     private String createdAt;
     private String introduction;
+    private String profileImageUrl;
 
     public UserResponseDto(User user) {
         this.email = user.getEmail();
         this.nickname = user.getNickname();
         this.createdAt = user.getCreatedAt().toString();
         this.introduction = user.getIntroduction();
+        this.profileImageUrl = user.getProfileImageUrl();
     }
 }
