@@ -26,6 +26,7 @@ public class StudyDto {
         private String title;
         private String description;
         private String authorNickname;
+        private String authorProfile;
         private int likes;
         private int views;
         private LocalDateTime createdAt;
@@ -38,6 +39,7 @@ public class StudyDto {
             this.title = study.getTitle();
             this.description = study.getDescription();
             this.authorNickname = study.getAuthor().getNickname();
+            this.authorProfile = study.getAuthor().getProfileImageUrl();
             this.likes = study.getLikes();
             this.views = study.getViews();
             this.createdAt = study.getCreatedAt();
