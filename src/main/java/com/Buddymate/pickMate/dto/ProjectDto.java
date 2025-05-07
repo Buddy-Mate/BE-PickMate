@@ -34,6 +34,7 @@ public class ProjectDto {
         private String description;
         private List<String> techStack;
         private String authorNickname;
+        private String authorProfile;
         private int likes;
         private int views;
         private LocalDateTime createdAt;
@@ -47,6 +48,7 @@ public class ProjectDto {
             this.description = project.getDescription();
             this.techStack = convertStringToList(project.getTechStack());
             this.authorNickname = project.getAuthor().getNickname();
+            this.authorProfile = project.getAuthor().getProfileImageUrl();
             this.likes = project.getLikes();
             this.views = project.getViews();
             this.createdAt = project.getCreatedAt();
