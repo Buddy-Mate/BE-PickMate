@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,4 +21,6 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     void increaseViewCount(@Param("id") Long id);
 
     List<Project> findByAuthor(User author);
+
+    List<Project> findByDeadlineBeforeAndExpiredStatusFalse(LocalDateTime deadline);
 }
