@@ -7,6 +7,7 @@ import com.Buddymate.pickMate.repository.StudyRepository;
 import lombok.RequiredArgsConstructor;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
+import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -14,13 +15,20 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class ExpiredCheck implements Job {
+public class ExpiredCheckJob extends QuartzJobBean {
 
     private final ProjectRepository projectRepository;
     private final StudyRepository studyRepository;
 
+
+    public ExpiredCheckJob(ProjectRepository projectRepository, StudyRepository studyRepository) {
+        this.projectRepository = projectRepository;
+        this.studyRepository = studyRepository;
+    }
+
+
     @Override
-    public void execute(JobExecutionContext context) {
+    public void executeInternal(JobExecutionContext context) {
         LocalDateTime now =  LocalDateTime.now();
 
         // 프로젝트 마감 job
