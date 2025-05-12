@@ -41,6 +41,9 @@ public class Project {
     @Column(nullable = false)
     private LocalDateTime deadline;
 
+    @Column(nullable = false)
+    private boolean expiredStatus = false;
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
