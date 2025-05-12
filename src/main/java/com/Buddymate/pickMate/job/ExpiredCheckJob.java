@@ -5,6 +5,7 @@ import com.Buddymate.pickMate.entity.Study;
 import com.Buddymate.pickMate.repository.ProjectRepository;
 import com.Buddymate.pickMate.repository.StudyRepository;
 import lombok.RequiredArgsConstructor;
+import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.springframework.scheduling.quartz.QuartzJobBean;
@@ -14,7 +15,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Component
-@RequiredArgsConstructor
+@DisallowConcurrentExecution
 public class ExpiredCheckJob extends QuartzJobBean {
 
     private final ProjectRepository projectRepository;
